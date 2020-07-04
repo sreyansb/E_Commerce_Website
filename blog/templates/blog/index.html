@@ -1,0 +1,47 @@
+{% extends 'blog/basic.html' %}
+
+{% block body %}
+  <body>
+    <div class="container mt-3">
+      <div class="row my-2"><!-- it is for a row--><!-- Two items in a row-->
+        {% for i in allblogs %}
+        <div class="col-md-6">
+          <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+            <div class="col p-4 d-flex flex-column position-static">
+              <strong class="d-inline-block mb-2 text-primary">{{i.author}}</strong>
+              <h3 class="mb-0">{{i.title}}</h3>
+              <div class="mb-1 text-muted">{{i.published_date}}</div>
+              <p class="card-text mb-auto">{{ i.head0 }}</p>
+              <p class="content card-text mb-auto">{{ i.head0content|truncatechars:50 }}</p>
+              
+              <!-- very important to give blog/...-->
+              <a href="/blog/blogpost/{{i.post_id}}" class="stretched-link">Continue reading</a>
+            </div>
+            <div class="col-auto d-none d-lg-block">
+              <img style="border-radius: 0.2em 0px 0px 0.2em;" class="bd-placeholder-img" width="200" height="250" src="/media/{{i.thumbnail}}" >
+              <title>Placeholder</title>
+            </div>
+          </div>
+        </div>
+        {% if forloop.counter|divisibleby:2 %}
+          </div><div class="row my-2"><!-- close a row and start a new row-->
+        {% endif %}
+        {% endfor %}
+    </div>
+
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+  </body>
+{% endblock %}
+{% block js %}
+<script>
+  var cart=JSON.parse(localStorage.getItem('cart'));
+  beginview(cart);
+
+</script>
+{% endblock %}

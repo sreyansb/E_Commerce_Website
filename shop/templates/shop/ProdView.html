@@ -1,0 +1,62 @@
+{% extends 'shop/basic.html' %}
+
+{% block title %}{{product.product_name}}{% endblock %}<!-- since we used filter in the retrieval method in views.py-->
+{% block css %}
+<style>
+  img{
+    transition:.2s;
+  }
+  img:hover{
+    transform: scale(1.05);
+  }
+</style>
+{% endblock %}
+{% block body %}
+
+<div class="container my-4">
+    <div class="row align-items-center">
+        <div class="col-md-4">
+            <div class="row ">
+                <img src="/media/{{product.image}}" width='100%' height="auto">
+            </div>
+            <div class='container'>
+                <!--
+                  <div class="btn btn-primary my-2 px-2 mx-5" >Buy Now</div>
+                -->
+                <div id="pr{{product.id}}" class="btn btn-primary my-2 cart" style="margin-left:6rem">Add to Cart</div>
+            </div>
+        </div>
+        <div class="col-md-3  text-center">
+            <h5 id="namee" style="text-transform: uppercase;">{{product.product_name}}</h5>
+            <p><b>&#8377; <span id="price" >{{product.price}}</span></b></p>
+            <p>{{product.desc}}</p>
+        </div>
+    </div>
+</div>
+{%endblock %}
+
+{% block js %}
+<script>
+  
+  if (localStorage.getItem('cart')==undefined)
+  { var cart={};}
+  else
+    var cart=JSON.parse(localStorage.getItem('cart'));
+
+  beginview(cart);
+
+  $('.cart').click(function(){
+    cart=JSON.parse(localStorage.getItem('cart'));
+    var ff=this.id.toString();
+    if (cart[ff]!=undefined)
+      cart[ff][0]+=1;
+    else
+      cart[ff]=[1,document.getElementById("namee").innerHTML,(document.getElementById("price").innerHTML)];
+    localStorage.setItem('cart',JSON.stringify(cart));
+    //innerHTML mein i hamesha smallcaps hoga
+    document.getElementById("cartmany").innerHTML=parseInt(document.getElementById("cartmany").innerHTML)+1;//the object cart in if else block i.e created in this script
+    beginview(cart);
+  });
+  
+</script>
+{% endblock %}

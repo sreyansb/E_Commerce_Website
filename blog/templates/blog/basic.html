@@ -1,0 +1,166 @@
+<!-- base website having the navbar and hence used by other websites, quite easy-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    <title>{% block title %}{% endblock %}</title>
+      <style>
+          {% block css %}
+          {% endblock %}
+      </style>
+  </head>
+  <body>
+  {% load static %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand" href="/shop">My Awesome Cart</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="/shop">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/shop/about">About</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/shop/contact">Contact Us</a>
+      </li>
+      <li class="nav-item">
+        <!--tracker is in view-->
+        <a class="nav-link" href="/shop/tracker">Tracker</a>
+      </li>
+      <li class="nav-item">
+        <!--tracker is in view-->
+        <a class="nav-link" href="/blog">Blog</a>
+      </li>
+    </ul>
+    <form class="form-inline my-2 my-lg-0">
+      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </form>
+    <!-- popover icon appears below -->
+    <!-- has to be initialised using JS present below-->
+    <button type="button" data-html='true' data-trigger="focus" id="popperover" class="btn btn-secondary mx-2" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Vivamus
+    sagittis lacus vel augue laoreet rutrum faucibus.">
+      Cart(<span id="cartmany">0</span>)
+    </button>
+  </div>
+</nav>
+{% block body %}{% endblock %}
+<!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v7.0" nonce="zzv8jAD5"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+  </body>
+
+  <script>
+  // For pages which are not index->beginview and clearcart1
+  function beginview(cart)
+  {
+    let sum=0;
+    
+    var s="<h5>Items in your cart </h5>";
+    var i=1;
+    //console.log(cart);
+    for (items in cart)
+      { //console.log("inside");
+        s+="<b>"+String(i)+". </b>"
+        sum+=cart[items][0];
+        s+=(cart[items][1].toUpperCase()+"...").slice(0,Math.min(cart[items][1].length,10))+" Qty: " + String(cart[items][0])+" ";
+        s+="&#8377;"+String(parseInt(cart[items][2])*parseFloat(cart[items][0]))+"<br>" ;
+        i+=1;
+      }
+    if (s!="<h5>Items in your cart </h5>")
+        s+="<a href='/shop/checkout'><button class='btn btn-primary' id='CheckOut'>CheckOut</button></a>"+"<button class='btn btn-primary mx-2' onclick='clearcart1()' id='clearCart'>ClearCart</button></a>"; 
+    document.getElementById('popperover').setAttribute('data-content',s);
+    $('#popperover').popover();
+    document.getElementById("cartmany").innerHTML=sum;
+    localStorage.setItem('cart',JSON.stringify(cart));
+  }
+  function clearcart1()
+  {
+    var cart=JSON.parse(localStorage.getItem('cart'));
+    window.localStorage.clear();
+    cart={};
+    //console.log('hi');
+    beginview(cart);
+    //console.log("clearcart",cart)
+  }
+
+//for index page
+    //under each product of each category (if it has been updated-> added to cart before) make the -/+ button appear
+  function updatecart(cart) 
+    {//console.log("updatecart",cart);
+    var sum = 0;
+    for (var item in cart)
+     {
+        sum = sum + cart[item][0];
+        s="."+('div'+item);
+        //if (document.body.contains(document.getElementById(s)))
+        document.getElementById('div' + item).innerHTML = "<button id='minus" + item + "' class='btn btn-primary minus'>-</button> <span id='val" + item + "''>" + cart[item][0] + "</span> <button id='plus" + item + "' class='btn btn-primary plus'> + </button>";
+     }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    document.getElementById('cartmany').innerHTML = sum;
+    updatepopover(cart);
+    }
+
+    //updating pop-over with elements of the cart
+  function updatepopover(cart)
+  {
+    //console.log("updatepopover",cart);
+    //console.log("Update pop-over");
+    popStr="<h5>Items in your cart </h5>";
+    var i=1;
+    for (var item in cart)
+    { 
+      //item is of the form prid where id is the unique id of each product assigned by the databbase
+      popStr+="<b>"+String(i)+". </b>";
+      //if (document.body.contains(document.getElementById("name"+item)))
+       {s=(((document.getElementById("name"+item)).innerHTML)).toUpperCase();
+      popStr+=(s+"...").slice(0,Math.min(s.length,10))+" Qty: " + String(cart[item][0]);
+      popStr+=" &#8377;"+String(parseInt(cart[item][2])*parseFloat(cart[item][0]))+"<br>" ;
+       i+=1;}
+    }
+    if (popStr!="<h5>Items in your cart </h5>")
+      popStr+="<a href='/shop/checkout'><button class='btn btn-primary' id='CheckOut'>CheckOut</button></a>"+"<button class='btn btn-primary mx-2' onclick='clearcart()' id='clearCart'>ClearCart</button></a>";
+    
+    document.getElementById('popperover').setAttribute('data-content',popStr);
+    $('#popperover').popover();
+  }
+
+    //cart ko update - to print the number of items in the cart at the beginning when the website launches.
+    if (localStorage.getItem('cart')==null)
+    { 
+      var cart={};
+    }
+    else
+    {
+      cart=JSON.parse(localStorage.getItem('cart'));
+      var items=0;
+      for (var key in cart)
+        items+=parseInt(cart[key][0]);
+      //document.getElementById("cartmany").innerHTML=Object.keys(cart).length;
+      document.getElementById("cartmany").innerHTML=items;
+      
+    }
+    localStorage.setItem('cart',JSON.stringify(cart));
+
+    //initialise the popover cart
+  //$('#popperover').popover()
+  //document.getElementById('popperover').setAttribute('data-content',"<h6>WHo let the dogs out</h6>");
+  //updating pop-over with elements of the cart
+  
+  </script>
+  {% block js %}{% endblock %}
+</html>

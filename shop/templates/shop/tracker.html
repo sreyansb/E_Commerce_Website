@@ -1,0 +1,117 @@
+{% extends 'shop/basic.html' %}
+<!-- we will write ajax in this code so that details are available on the click-->
+<!-- check -->
+{% block title %}Check out{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <div class="col">
+        <h2 class="my-3">
+            Track Your Order
+        </h2>
+        <p class='text-center'>Enter your Order ID and Email ID(for verification)</p>
+        <form method="POST" action="#" id="trackerform">{% csrf_token %}
+        <div class="form-row">
+          <div class="form-group col-md-6">
+              <label for="name">Order ID</label>
+              <input type="text" required="true" class="form-control" name="order_ID" id="order_ID" placeholder="Order ID">
+          </div>
+          <div class="form-group col-md-6">
+              <label for="inputEmail4">Email</label>
+              <input type="email" required="true" class="form-control" name="email" id="email" placeholder="Email">
+          </div>
+          <button type="submit" class="btn btn-primary">Track Order</button>
+        </form>
+    </div>
+
+    <div class="col my-4">
+      <h2>
+        Your Order Status
+      </h2>
+      <div class="my-4">
+        <ul class "list-group" id="items">
+          <li class="list-group-item  text-center align-items-center">Enter your Order Id and Email Id in the form above!</li>
+        </ul>
+      </div>
+      <h2>
+        Your Order Items
+      </h2>
+      <div class="my-4">
+        <ul class "list-group" id="oitems">
+          <li class="list-group-item  text-center align-items-center">Enter your Order Id and Email Id in the form above!</li>
+        </ul>
+      </div>
+
+
+    </div>
+</div>
+{%endblock %}
+
+{% block js %}
+<script>
+
+  var cart=JSON.parse(localStorage.getItem("cart"));
+  beginview(cart);
+  $('#trackerform').submit(function(event){
+    event.preventDefault();
+
+    $('#items').empty();
+    $('#oitems').empty();
+
+    var formdata={
+      'order_ID':$('input[name=order_ID]').val(),
+      'email':$('input[name=email]').val(),
+      'csrfmiddlewaretoken':$('input[name=csrfmiddlewaretoken]').val()
+    };
+
+    //ajax starts here
+    $.ajax({
+      type:'POST',
+      url:'/shop/tracker/',
+      data:formdata,
+      encode:true
+    })
+    //data is a list returned by the above function.
+    //it is a callback- data is returned by the python function and also
+    .done(function(data){
+
+      mydata=JSON.parse(data);
+      updates=mydata[0];
+      
+      if (updates!=undefined && updates!={} && updates.length > 0 )
+      { 
+        for(var i=0;i<updates.length;++i)
+        {
+          var time=updates[i]['time'];
+          var Description=updates[i]['Description'];
+          //next line represents the elements of the list of the review of items
+          stringy='<li class="list-group-item d-flex justify-content-between align-items-center">'+Description+'<span class="badge badge-primary badge-pill">'+time.slice(0,10)+'</span></li>';
+          $('#items').append(stringy);//appends data to the the list
+        }
+
+        updates=JSON.parse(mydata[1]);//because mydata[1] is a string
+        console.log(typeof(updates));
+        for(var i in updates)
+        { console.log(i);
+          var qty=updates[i][0];
+          var Name=updates[i][1].toUpperCase();
+          //next line represents the elements of the list of the review of items
+          stringy='<li class="list-group-item d-flex justify-content-between align-items-center">'+Name+'<span class="badge badge-primary badge-pill">'+qty+'</span></li>';
+          $('#oitems').append(stringy);//appends data to the the list
+        }
+      }
+
+      else
+      {
+        stringy='<li class="list-group-item  text-center align-items-center">Have you entered the correct order-ID and email?</li>';
+          $('#items').append(stringy);
+
+      }
+
+    });
+
+  });
+
+</script>
+{% endblock %}

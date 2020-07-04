@@ -1,0 +1,164 @@
+{% extends 'shop/basic.html' %}
+{% load static %}
+{% block title %}Shop here!{% endblock %}
+      {% block css %}
+          .col-md-3
+          {
+          display: inline-block;
+          margin-left:-4px;
+          }
+          .carousel-indicators .active {
+          background-color: transparent;
+            }
+          .col-md-3 img{
+          width:100%;
+          height:auto;
+          }
+          body .carousel-indicator li{
+          background-color: blue;
+          
+          }
+          body .carousel-indicators{
+            display:none;
+          bottom: 0;
+
+          }
+          body .carousel-control-prev-icon,
+          body .carousel-control-next-icon{
+          background-color: blue;
+          }
+          .carousel-control-prev,
+          .carousel-control-next{
+          top:auto;
+          padding-top:150px;
+          bottom:auto;
+          }
+
+          body .no-padding{
+           padding-left: 0;
+           padding-right: 0;
+           }
+      {% endblock %}
+
+{% block body %}
+<div class="container">
+  <!-- slideshow starts here-->
+  <!-- for each demo id iss loop ka loop_counter chahiye-->
+  {% for products, range, no_of_slides in allProds %}
+  <h3 class='my-4'>{{products.0.category}}</h3>
+  <div class="row">
+<div id="demo{{forloop.counter}}" class="col carousel slide my-3" data-ride="carousel">
+    <ul class="carousel-indicators"><!-- to print the sliders at the bottom -->
+      <li data-target="#demo{{forloop.counter}}" data-slide-to="0" class="active"></li><!--always to display one slide-->
+      {% for i in range %}
+      <!-- parent ka loop chahiye the-->
+      <li data-target="#demo{{forloop.parentloop.counter}}" data-slide-to="{{i}}"></li>
+      {% endfor %}
+    </ul>
+
+    <!--Slideshow starts here -->
+    <div class="container carousel-inner no-padding"><!-- for the entire slide show ke liye container -->
+      <div class="carousel-item active"><!-- one slide i.e. 4 cards ke liye container 'col-md-3' -->
+       <!-- This part can be looped as -->
+       {% for i in products %}<!-- products is a parameter coming in from views.py -->
+        <div class="col-xs-3 col-sm-3 col-md-3">
+          <div class="card align-items-center" style="width: 18rem;">
+            <img src='/media/{{i.image}}' class="card-img-top" alt="...">
+            <div class="card-body align-items-center">
+              <h5 class="card-title text-center" id="namepr{{i.id}}">{{i.product_name}}</h5>
+              <p class="card-text text-center">{{i.desc|truncatechars:33}}</p>
+              <h5 class="card-title text-center" id="pricepr{{i.id}}">&#8377;{{i.price}}</h5>
+              <!-- we use only i.id and not i.prod-->
+              <span id="divpr{{i.id}}" class='divpr'>
+                <button id="pr{{i.id}}" class="btn btn-primary cart">Add to Cart</button>
+              </span>
+              <a href="/shop/products/{{i.id}}"><button id="qv{{i.id}}" class="btn btn-primary">Quick View</button></a>
+            </div>
+          </div>
+        </div>
+        <!--
+         4 in a slide->1,2,3,4 in django ->divisible by 4 as forlooop_counter starts from 1.
+         forloop.counter!=0
+         forloop.last is false because last item ke baad carousel nahi chahiye
+        -->
+        {% if forloop.counter|divisibleby:4 and not forloop.last %}
+        </div><!--for active waala part and further-->
+        <div class="carousel-item">
+        {% endif %}
+       {% endfor %}
+      </div><!-- finally to close carousel item both active and non-active -->
+
+    </div>
+  </div>
+    <!-- left and right controls for the slide -->
+    <!-- we put forloop_counter because neeche waale icons work nahi ho rahe the-->
+    <a class="carousel-control-prev" href="#demo{{forloop.counter}}" data-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </a>
+    <a class="carousel-control-next" href="#demo{{forloop.counter}}" data-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </a>
+    </div>
+    {% endfor %}
+  
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+  
+  function clearcart(){
+    var cart=JSON.parse(localStorage.getItem('cart'));
+    for (item in cart)
+    { //"div"+item and not just item
+      document.getElementById("div"+item).innerHTML='<button id="'+item+'" class="btn btn-primary cart">Add to Cart</button>'
+    }
+    window.localStorage.clear();
+    cart={};
+    //console.log('hi');
+    updatecart(cart);
+    //console.log("clearcart",cart)
+  }
+  updatecart(cart);
+
+  //idstr in form of "pr"+id(of product)
+  $('.divpr').on('click','button.cart',function(){
+    cart=JSON.parse(localStorage.getItem('cart'));
+    //console.log(cart);
+    var idstr=this.id.toString();
+    if (cart[idstr]!=undefined)
+      {cart[idstr][0]+=1;}
+    else
+      cart[idstr]=[1,document.getElementById("name"+idstr).innerHTML,(document.getElementById("price"+idstr).innerHTML).slice(1,)];
+    updatecart(cart);
+  });
+
+  $('.divpr').on('click','button.minus',function(){
+    a=this.id.slice(5,);
+    cart[a][0]-=1;
+    cart[a][0]=Math.max(0,cart[a][0]);
+    document.getElementById("val"+a).innerHTML=cart[a][0];
+    if (cart[a][0]==0)
+    { document.getElementById("div"+a).innerHTML='<button id="'+a+'" class="btn btn-primary cart">Add to Cart</button>';
+      delete cart[a];}
+    updatecart(cart);
+    updatepopover(cart);
+    document.getElementById("cartmany").innerHTML=Math.max(parseInt(document.getElementById("cartmany").innerHTML),0);
+    //console.log("minus-clicked");
+  });
+
+  $('.divpr').on('click','button.plus',function(){
+    //console.log(document.getElementById("cartmany").innerHTML);
+    a=this.id.slice(4,);//because plus has 4 character but minus has 5
+    cart[a][0]+=1;
+    document.getElementById("val"+a).innerHTML=cart[a][0];
+    updatecart(cart);
+    updatepopover(cart);
+    //document.getElementById("cartmany").innerHTML=parseInt(document.getElementById("cartmany").innerHTML)+1;
+  });
+
+</script>
+{% endblock %}
+
+
+

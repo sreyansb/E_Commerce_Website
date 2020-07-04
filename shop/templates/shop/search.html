@@ -1,0 +1,80 @@
+{% extends 'shop/basic.html' %}
+
+{% block title %}Search{% endblock %}
+
+{% block body %}
+<div class="container">
+  <!-- slideshow starts here-->
+  <!-- for each demo id iss loop ka loop_counter chahiye-->
+  {% if msg %}
+
+  {% for products, range, no_of_slides in allProds %}
+  <h3 class='my-4'>{{products.0.category}}</h3>
+  <div class="row">
+<div id="demo{{forloop.counter}}" class="col carousel slide my-3" data-ride="carousel">
+    <ul class="carousel-indicators"><!-- to print the sliders at the bottom -->
+      <li data-target="#demo{{forloop.counter}}" data-slide-to="0" class="active"></li><!--always to display one slide-->
+      {% for i in range %}
+      <!-- parent ka loop chahiye the-->
+      <li data-target="#demo{{forloop.parentloop.counter}}" data-slide-to="{{i}}"></li>
+      {% endfor %}
+    </ul>
+
+    <!--Slideshow starts here -->
+    <div class="container carousel-inner no-padding"><!-- for the entire slide show ke liye container -->
+      <div class="carousel-item active"><!-- one slide i.e. 4 cards ke liye container 'col-md-3' -->
+       <!-- This part can be looped as -->
+       {% for i in products %}<!-- products is a parameter coming in from views.py -->
+        <div class="col-xs-3 col-sm-3 col-md-3">
+          <div class="card align-items-center" style="width: 18rem;">
+            <img src='/media/{{i.image}}' class="card-img-top" alt="...">
+            <div class="card-body align-items-center">
+              <h5 class="card-title text-center" id="namepr{{i.id}}">{{i.product_name}}</h5>
+              <p class="card-text text-center">{{i.desc|truncatechars:33}}</p>
+              <h5 class="card-title text-center" id="pricepr{{i.id}}">&#8377;{{i.price}}</h5>
+              <!-- we use only i.id and not i.prod-->
+              <span id="divpr{{i.id}}" class='divpr'>
+                <button id="pr{{i.id}}" class="btn btn-primary cart">Add to Cart</button>
+              </span>
+              <a href="/shop/products/{{i.id}}"><button id="qv{{i.id}}" class="btn btn-primary">Quick View</button></a>
+            </div>
+          </div>
+        </div>
+        <!--
+         4 in a slide->1,2,3,4 in django ->divisible by 4 as forlooop_counter starts from 1.
+         forloop.counter!=0
+         forloop.last is false because last item ke baad carousel nahi chahiye
+        -->
+        {% if forloop.counter|divisibleby:4 and not forloop.last %}
+        </div><!--for active waala part and further-->
+        <div class="carousel-item">
+        {% endif %}
+       {% endfor %}
+      </div><!-- finally to close carousel item both active and non-active -->
+
+    </div>
+  </div>
+    <!-- left and right controls for the slide -->
+    <!-- we put forloop_counter because neeche waale icons work nahi ho rahe the-->
+    <a class="carousel-control-prev" href="#demo{{forloop.counter}}" data-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </a>
+    <a class="carousel-control-next" href="#demo{{forloop.counter}}" data-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </a>
+    </div>
+    {% endfor %}
+  {% endif %}
+</div>
+{%endblock %}
+
+{% block js %}
+<script>
+  beginview(cart);
+  {% if msg == 0 %}
+  alert("We could not find a relevant product.");
+  document.location="/";
+  {% endif %}
+  
+</script>
+{% endblock %}

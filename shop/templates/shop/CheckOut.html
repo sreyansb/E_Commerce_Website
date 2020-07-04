@@ -1,0 +1,126 @@
+{% extends 'shop/basic.html' %}
+
+{% block title %}Check out{% endblock %}
+
+{% block css %}
+.badge-primary(
+  background-color:'green';
+)
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="col">
+        <h2 class="my-3">
+            Review Your Cart Items
+        </h2>
+        <div>
+            <ul class="list-group" id="items"><!-- came from bootstrap https://getbootstrap.com/docs/4.5/components/list-group/#with-badges-->
+            </ul>
+            <span id="totalPrice" class="badge float-right badge-primary text-right badge-pill py-0 my-2" style="background-color: green;height: 26px;"></span>
+        </div>
+    </div>
+    <div class="col">
+    
+        <h2 class="my-4">
+            Enter Address and Other Details
+        </h2>
+        <form method="POST" action="/shop/checkout/">{% csrf_token %}
+          <input type="hidden" name="items_json" id="items_json">
+          <input type="hidden" name="amount" id="amount">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="name">Name</label>
+                    <input type="text" required="true" class="form-control" name="name" id="name" placeholder="">
+                  </div>
+                <div class="form-group col-md-6">
+                    <label for="inputEmail4">Email</label>
+                    <input type="email" required="true" class="form-control" name="email" id="email" placeholder="Email">
+                </div>
+            </div>
+            <div class="form-group">
+              <label for="inputAddress">Address Line 1</label>
+              <input type="text" required="true" class="form-control" name="address1" id="address1" placeholder="1234 Main St">
+            </div>
+            <div class="form-group">
+              <label for="inputAddress2">Address Line 2</label>
+              <input type="text" required="true" class="form-control" name="address2" id="address2" placeholder="Apartment, studio, or floor">
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="inputCity">City</label>
+                <input type="text" required="true" class="form-control" name="city" id="city">
+              </div>
+              <div class="form-group col-md-4">
+                <label for="State">State</label>
+                <input type="text" required="true" class="form-control" name="state" id="state" placeholder="State">
+              </div>
+              <div class="form-group col-md-2">
+                <label for="inputZip">Zip</label>
+                <input type="text" required="true" class="form-control" name="zip_code" id="zip_code">
+              </div>
+              <div class="form-group col-md-2">
+                <label for="inputZip">Phone Number</label>
+                <input type="tel" required="true" class="form-control" name="phone" id="phone">
+              </div>
+            </div>
+            <!-- <div class="form-group">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="gridCheck">
+                <label class="form-check-label" for="gridCheck">
+                  Check me out
+                </label>
+              </div>
+            </div> -->
+            <button type="submit" class="btn btn-primary">Place Order</button>
+          </form>
+    </div>
+</div>
+{%endblock %}
+
+{% block js %}
+<script>
+  if (localStorage.getItem('cart')==null)
+    { 
+      var cart={};
+    }
+  else
+    {
+      cart=JSON.parse(localStorage.getItem('cart'));
+    }
+  var sum=0
+  for (items in cart)
+    sum+=cart[items][0];
+  if (cart==undefined || sum==0)
+  {
+    stringy="<p><h6 class='text-center'>You have 0 items in the cart.</h6></p><h6 class='text-center'>We have a great lot of products.Why don't you Buy Some?</h6>";
+    $('#items').append(stringy);
+  }
+  else
+  { var sum=0.0;
+    for (var item in cart)
+    {
+      var name=cart[item][1];
+      var qty=cart[item][0];
+      let totprice=parseFloat(cart[item][2])*parseFloat(cart[item][0]);
+      sum+=totprice;
+      //next line represents the elements of the list of the review of items
+      if (qty!=0)
+      {stringy='<li class="list-group-item d-flex justify-content-between align-items-center">'+name.toUpperCase()+'<span class="badge badge-primary badge-pill" style="background-color: green" >'+qty+' x &#8377;'+cart[item][2]+'</span></li>';
+      $('#items').append(stringy);}//appends data to the the list
+    }
+    document.getElementById("totalPrice").innerHTML="<h5>Total: &#8377;"+Math.round(sum)+"</h5>";
+    $('#amount').val(sum);
+
+  }
+  document.getElementById('items_json').value=JSON.stringify(cart);
+  
+  {% if thank %}
+    alert("Thank You for ordering!Track your order using Order ID={{id}}");
+    localStorage.clear();
+    document.location="/shop";
+  {% endif %}//very important
+
+    
+</script>
+{% endblock %}
